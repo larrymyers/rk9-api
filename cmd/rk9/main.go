@@ -13,6 +13,6 @@ func main() {
 	}
 
 	for _, event := range events {
-		fmt.Printf("%s %s\n", event.Name, event.Location)
+		fmt.Printf("%s\n%s - %s\n%s\n%s\n%s\n\n", event.Name, event.StartDate, event.EndDate, event.Location, event.DetailsURL, event.PairingsURL)
 	}
 }

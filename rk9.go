@@ -51,6 +51,11 @@ func GetEvents() ([]*Event, error) {
 		return nil, err
 	}
 
+	linkSel, err := cascadia.Parse("a")
+	if err != nil {
+		return nil, err
+	}
+
 	doc, err := html.Parse(bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -83,8 +88,25 @@ func GetEvents() ([]*Event, error) {
 		event.Name = text
 		event.URL = href
 
-		// dateRange := strings.TrimSpace(cols[0].Data)
+		start, end, err := parseDateRange(strings.TrimSpace(cols[0].FirstChild.Data))
+		if err != nil {
+			return nil, err
+		}
+
+		event.StartDate = start
+		event.EndDate = end
+
 		event.Location = strings.TrimSpace(cols[3].FirstChild.Data)
+
+		links := cascadia.QueryAll(cols[4], linkSel)
+		for _, link := range links {
+			text, href := parseAnchor(link)
+			if text == "TCG" {
+				event.DetailsURL = href
+				event.PairingsURL = strings.Replace(href, "tournament", "pairings", 1)
+				break
+			}
+		}
 
 		events = append(events, event)
 	}
@@ -105,7 +127,68 @@ func parseAnchor(node *html.Node) (string, string) {
 		}
 	}
 
-	text := strings.TrimSpace(node.FirstChild.Data)
+	text := ""
+	n := node.FirstChild
+	for n != nil {
+		if n.Type == html.TextNode {
+			text += n.Data
+		}
+
+		n = n.NextSibling
+	}
+
+	text = strings.TrimSpace(text)
 
 	return text, href
+}
+
+func parseDateRange(s string) (time.Time, time.Time, error) {
+	s = strings.ReplaceAll(s, "–", "-")
+	parts := strings.Split(s, " ")
+
+	// same month: April 1-10, 2023
+	if len(parts) == 3 {
+		month := parts[0]
+		days := parts[1]
+		year := parts[2]
+
+		days = strings.Trim(days, ",")
+		dayParts := strings.Split(days, "-")
+		startDay := dayParts[0]
+		endDay := dayParts[1]
+
+		start, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s %s", month, startDay, year))
+		if err != nil {
+			return time.Now(), time.Now(), err
+		}
+
+		end, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s %s", month, endDay, year))
+		if err != nil {
+			return time.Now(), time.Now(), err
+		}
+
+		return start, end, nil
+	}
+
+	// multiple months: January 4-July 18, 2024
+	if len(parts) == 4 {
+		parts = strings.Split(s, ",")
+		year := parts[1]
+		rest := parts[0]
+		parts = strings.Split(rest, "-")
+
+		start, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s", parts[0], year))
+		if err != nil {
+			return time.Now(), time.Now(), err
+		}
+
+		end, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s", parts[1], year))
+		if err != nil {
+			return time.Now(), time.Now(), err
+		}
+
+		return start, end, nil
+	}
+
+	return time.Now(), time.Now(), errors.New(fmt.Sprintf("unrecognized date range: %s", s))
 }
