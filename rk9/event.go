@@ -23,10 +23,10 @@ type Event struct {
 	PairingsURL string
 }
 
-var EventsURL = "https://rk9.gg/events/pokemon"
+var EventsURL = "/events/pokemon"
 
 func GetEvents() ([]*Event, error) {
-	resp, err := http.Get(EventsURL)
+	resp, err := http.Get(BaseURL + EventsURL)
 	if err != nil {
 		return nil, err
 	}

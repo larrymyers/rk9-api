@@ -1,4 +1,4 @@
-module larrymyers.com/rk9
+module larrymyers.com/rk9api
 
 go 1.22.0
 

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"larrymyers.com/rk9"
+	"larrymyers.com/rk9api/rk9"
 )
 
 func main() {
