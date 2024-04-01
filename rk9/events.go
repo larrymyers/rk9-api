@@ -14,13 +14,24 @@ import (
 )
 
 type Event struct {
-	Name        string
-	Location    string
-	StartDate   time.Time
-	EndDate     time.Time
-	URL         string
-	DetailsURL  string
-	PairingsURL string
+	ID        string
+	Name      string
+	Location  string
+	StartDate time.Time
+	EndDate   time.Time
+	URL       string
+}
+
+func (evt *Event) DetailsURL() string {
+	return fmt.Sprintf("/tournament/%s", evt.ID)
+}
+
+func (evt *Event) PairingsURL() string {
+	return fmt.Sprintf("/pairings/%s", evt.ID)
+}
+
+func (evt *Event) RosterURL() string {
+	return fmt.Sprintf("/roster/%s", evt.ID)
 }
 
 var EventsURL = "/events/pokemon"
@@ -102,8 +113,8 @@ func GetEvents() ([]*Event, error) {
 		for _, link := range links {
 			text, href := parseAnchor(link)
 			if text == "TCG" {
-				event.DetailsURL = href
-				event.PairingsURL = strings.Replace(href, "tournament", "pairings", 1)
+				parts := strings.Split(href, "/")
+				event.ID = parts[len(parts)-1]
 				break
 			}
 		}

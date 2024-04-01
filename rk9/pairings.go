@@ -38,7 +38,7 @@ type Player struct {
 }
 
 func GetRound(event *Event, pod int, round int) ([]*Match, error) {
-	reqURL, err := url.Parse(BaseURL + event.PairingsURL)
+	reqURL, err := url.Parse(BaseURL + event.PairingsURL())
 	if err != nil {
 		return nil, err
 	}

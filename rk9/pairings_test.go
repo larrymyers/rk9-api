@@ -8,7 +8,7 @@ import (
 
 func TestGetRound(t *testing.T) {
 	event := Event{
-		PairingsURL: "/pairings/VAN01mctlk7ZeDoADoIh",
+		ID: "VAN01mctlk7ZeDoADoIh",
 	}
 
 	_, err := GetRound(&event, Masters, 1)
