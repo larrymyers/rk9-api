@@ -14,3 +14,20 @@ func TestGetRound(t *testing.T) {
 	_, err := GetRound(&event, Masters, 1)
 	assert.NoError(t, err)
 }
+
+func TestParseRecord(t *testing.T) {
+	wins, losses, ties, points, err := parseRecord("(6-1-2) 20 pts")
+
+	assert.NoError(t, err)
+	assert.Equal(t, 6, wins)
+	assert.Equal(t, 1, losses)
+	assert.Equal(t, 2, ties)
+	assert.Equal(t, 20, points)
+}
+
+func TestParseName(t *testing.T) {
+	name, country := parseName("Larry Myers [US]")
+
+	assert.Equal(t, "Larry Myers", name)
+	assert.Equal(t, "US", country)
+}

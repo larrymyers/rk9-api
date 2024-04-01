@@ -119,25 +119,8 @@ func parseAnchor(node *html.Node) (string, string) {
 		return "", ""
 	}
 
-	href := ""
-	for _, attr := range node.Attr {
-		if attr.Key == "href" {
-			href = attr.Val
-			continue
-		}
-	}
-
-	text := ""
-	n := node.FirstChild
-	for n != nil {
-		if n.Type == html.TextNode {
-			text += n.Data
-		}
-
-		n = n.NextSibling
-	}
-
-	text = strings.TrimSpace(text)
+	href := attrVal(node, "href")
+	text := innerText(node)
 
 	return text, href
 }
