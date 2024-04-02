@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetRounds(t *testing.T) {
+	event := Event{
+		ID: "VAN01mctlk7ZeDoADoIh",
+	}
+
+	_, err := GetRounds(&event)
+	assert.NoError(t, err)
+}
+
 func TestGetRound(t *testing.T) {
 	event := Event{
 		ID: "VAN01mctlk7ZeDoADoIh",

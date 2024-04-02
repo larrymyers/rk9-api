@@ -21,6 +21,12 @@ const (
 	Masters = 2
 )
 
+type EventRounds struct {
+	Juniors int
+	Seniors int
+	Masters int
+}
+
 type Match struct {
 	Player1 *Player
 	Player2 *Player
@@ -35,6 +41,70 @@ type Player struct {
 	Losses  int
 	Ties    int
 	Points  int
+}
+
+func GetRounds(event *Event) (EventRounds, error) {
+	rounds := EventRounds{}
+
+	reqURL, err := url.Parse(BaseURL + event.PairingsURL())
+	if err != nil {
+		return rounds, err
+	}
+
+	resp, err := http.Get(reqURL.String())
+	if err != nil {
+		return rounds, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return rounds, err
+	}
+
+	if resp.StatusCode != 200 {
+		return rounds, errors.New(fmt.Sprintf("%d: %s", resp.StatusCode, body))
+	}
+
+	doc, err := html.Parse(bytes.NewReader(body))
+	if err != nil {
+		return rounds, err
+	}
+
+	navLinkSel, err := cascadia.Parse(".nav-tabs .nav-link")
+	if err != nil {
+		return rounds, err
+	}
+
+	podRoundPattern := regexp.MustCompile(`P(?P<pod>\d)R(?P<round>\d+)`)
+
+	navLinks := cascadia.QueryAll(doc, navLinkSel)
+	for _, navLink := range navLinks {
+		href := attrVal(navLink, "href")
+		href = strings.TrimLeft(href, "#")
+		matches := podRoundPattern.FindStringSubmatch(href)
+
+		if len(matches) == 3 {
+			pod := matches[1]
+			round := matches[2]
+
+			roundNum, err := strconv.Atoi(round)
+			if err != nil {
+				return rounds, err
+			}
+
+			switch pod {
+			case "0":
+				rounds.Juniors = roundNum
+			case "1":
+				rounds.Seniors = roundNum
+			case "2":
+				rounds.Masters = roundNum
+			}
+		}
+	}
+
+	return rounds, nil
 }
 
 func GetRound(event *Event, pod int, round int) ([]*Match, error) {
