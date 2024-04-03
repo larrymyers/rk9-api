@@ -1,11 +1,8 @@
 package rk9
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 	"time"
 
@@ -37,19 +34,9 @@ func (evt *Event) RosterURL() string {
 var EventsURL = "/events/pokemon"
 
 func GetEvents() ([]*Event, error) {
-	resp, err := http.Get(BaseURL + EventsURL)
+	doc, err := getPage(BaseURL + EventsURL)
 	if err != nil {
 		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, errors.New(fmt.Sprintf("%d: %s", resp.StatusCode, body))
 	}
 
 	rowSel, err := cascadia.Parse("table tbody tr")
@@ -63,11 +50,6 @@ func GetEvents() ([]*Event, error) {
 	}
 
 	linkSel, err := cascadia.Parse("a")
-	if err != nil {
-		return nil, err
-	}
-
-	doc, err := html.Parse(bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

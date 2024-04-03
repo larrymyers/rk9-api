@@ -1,18 +1,12 @@
 package rk9
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/andybalholm/cascadia"
-	"golang.org/x/net/html"
 )
 
 const (
@@ -46,27 +40,7 @@ type Player struct {
 func GetRounds(event *Event) (EventRounds, error) {
 	rounds := EventRounds{}
 
-	reqURL, err := url.Parse(BaseURL + event.PairingsURL())
-	if err != nil {
-		return rounds, err
-	}
-
-	resp, err := http.Get(reqURL.String())
-	if err != nil {
-		return rounds, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return rounds, err
-	}
-
-	if resp.StatusCode != 200 {
-		return rounds, errors.New(fmt.Sprintf("%d: %s", resp.StatusCode, body))
-	}
-
-	doc, err := html.Parse(bytes.NewReader(body))
+	doc, err := getPage(BaseURL + event.PairingsURL())
 	if err != nil {
 		return rounds, err
 	}
@@ -79,6 +53,9 @@ func GetRounds(event *Event) (EventRounds, error) {
 	podRoundPattern := regexp.MustCompile(`P(?P<pod>\d)R(?P<round>\d+)`)
 
 	navLinks := cascadia.QueryAll(doc, navLinkSel)
+
+	// TODO do we need to iterate if we assume the links are ascending?
+	// why not just grab the last one that isn't the standings link?
 	for _, navLink := range navLinks {
 		href := attrVal(navLink, "href")
 		href = strings.TrimLeft(href, "#")
@@ -118,22 +95,7 @@ func GetRound(event *Event, pod int, round int) ([]*Match, error) {
 	vals.Add("pod", strconv.Itoa(pod))
 	reqURL.RawQuery = vals.Encode()
 
-	resp, err := http.Get(reqURL.String())
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, errors.New(fmt.Sprintf("%d: %s", resp.StatusCode, body))
-	}
-
-	doc, err := html.Parse(bytes.NewReader(body))
+	doc, err := getPage(reqURL.String())
 	if err != nil {
 		return nil, err
 	}
