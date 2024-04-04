@@ -22,19 +22,23 @@ type EventRounds struct {
 }
 
 type Match struct {
-	Player1 *Player
-	Player2 *Player
+	Player1 *EventPlayer
+	Player2 *EventPlayer
 	Table   string
-	Winner  *Player
+	Winner  *EventPlayer
 }
 
-type Player struct {
-	Name    string
-	Country string
-	Wins    int
-	Losses  int
-	Ties    int
-	Points  int
+type EventPlayer struct {
+	FirstName   string
+	LastName    string
+	MatchName   string
+	Country     string
+	Wins        int
+	Losses      int
+	Ties        int
+	Points      int
+	DecklistURL string
+	Standing    int
 }
 
 func GetRounds(event *Event) (EventRounds, error) {
@@ -139,13 +143,15 @@ func GetRound(event *Event, pod int, round int) ([]*Match, error) {
 
 			name, country := parseName(innerText(cascadia.Query(p, playerNameSel)))
 
-			player := Player{
-				Name:    name,
-				Country: country,
-				Wins:    wins,
-				Losses:  losses,
-				Ties:    ties,
-				Points:  points,
+			// TODO find a way to safely match name to FirstName + LastName and Country
+
+			player := EventPlayer{
+				MatchName: name,
+				Country:   country,
+				Wins:      wins,
+				Losses:    losses,
+				Ties:      ties,
+				Points:    points,
 			}
 
 			if hasClass(p, "player1") {

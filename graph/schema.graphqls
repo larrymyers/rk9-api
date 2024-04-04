@@ -1,0 +1,39 @@
+type Player {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  country: String!
+}
+
+type Event {
+  id: ID!
+  name: String!
+  location: String!
+  startDate: String!
+  endDate: String!
+  url: String!
+}
+
+type EventRounds {
+  juniors: Int
+  seniors: Int
+  masters: Int
+}
+
+type EventPlayer {
+  name: String!
+  country: String!
+  wins: Int
+  losses: Int
+  ties: Int
+  points: Int
+  decklistURL: String
+  standing: Int
+}
+
+type Match {
+  player1: EventPlayer!
+  player2: EventPlayer!
+  table: Int!
+  winner: EventPlayer!
+}
