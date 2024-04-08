@@ -6,7 +6,7 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	"larrymyers.com/rk9api/graph/generated"
 	"larrymyers.com/rk9api/graph/model"
@@ -14,7 +14,24 @@ import (
 
 // Events is the resolver for the events field.
 func (r *queryResolver) Events(ctx context.Context) ([]*model.Event, error) {
-	panic(fmt.Errorf("not implemented: Events - events"))
+	events, err := r.Client.GetEvents(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var mEvents []*model.Event
+	for _, event := range events {
+		mEvents = append(mEvents, &model.Event{
+			ID:        event.ID,
+			Name:      event.Name,
+			Location:  event.Location,
+			StartDate: event.StartDate.Format(time.RFC3339),
+			EndDate:   event.EndDate.Format(time.RFC3339),
+			URL:       event.URL,
+		})
+	}
+
+	return mEvents, nil
 }
 
 // Query returns generated.QueryResolver implementation.

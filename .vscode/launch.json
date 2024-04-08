@@ -5,12 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Main",
+      "name": "Run server",
       "type": "go",
       "request": "launch",
       "mode": "auto",
+      "program": "cmd/rk9/main.go",
+      "args": ["-server"],
       "cwd": "${workspaceFolder}",
-      "program": "cmd/rk9/main.go"
+      "envFile": "${workspaceFolder}/development.env"
     }
   ]
 }
