@@ -37,3 +37,7 @@ type Match {
   table: Int!
   winner: EventPlayer!
 }
+
+type Query {
+  events: [Event!]!
+}

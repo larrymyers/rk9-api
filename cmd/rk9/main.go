@@ -1,18 +1,31 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"flag"
 
-	"larrymyers.com/rk9api/rk9"
+	"larrymyers.com/rk9api/api"
 )
 
 func main() {
-	events, err := rk9.GetEvents()
-	if err != nil {
-		panic(err)
-	}
+	var initDB bool
+	var startServer bool
 
-	for _, event := range events {
-		fmt.Printf("%s\n%s - %s\n%s\n%s\n%s\n\n", event.Name, event.StartDate, event.EndDate, event.Location, event.DetailsURL, event.PairingsURL)
+	flag.BoolVar(&initDB, "init-db", false, "initialize new database")
+	flag.BoolVar(&startServer, "start", false, "start server")
+	flag.Parse()
+
+	if initDB {
+		builder := api.NewConnectionBuilder()
+		conn, err := builder.WithEnvVars().Build()
+		if err != nil {
+			panic(err)
+		}
+
+		err = api.ApplySchema(context.Background(), conn)
+		if err != nil {
+			panic(err)
+		}
+		return
 	}
 }
