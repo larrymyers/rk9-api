@@ -13,6 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 
 	client := api.NewClient(conn)
 
@@ -21,6 +22,29 @@ func main() {
 		err := client.UpsertEvent(context.Background(), event)
 		if err != nil {
 			panic(err)
+		}
+	}
+
+	events, err = client.GetEvents(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	for _, event := range events {
+		if event.HasStarted() {
+			rounds, err := rk9.GetRounds(event)
+			if err != nil {
+				panic(err)
+			}
+
+			for round := range rounds.Masters {
+				matches, err := rk9.GetRound(event, rk9.Masters, round+1)
+				if err != nil {
+					panic(err)
+				}
+
+				println(matches)
+			}
 		}
 	}
 }

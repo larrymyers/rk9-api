@@ -22,9 +22,12 @@ type EventRounds struct {
 }
 
 type Match struct {
+	EventID string
+	Pod     int
+	Round   int
+	Table   string
 	Player1 *EventPlayer
 	Player2 *EventPlayer
-	Table   string
 	Winner  *EventPlayer
 }
 
@@ -128,9 +131,13 @@ func GetRound(event *Event, pod int, round int) ([]*Match, error) {
 
 	matchesEl := cascadia.QueryAll(doc, matchSel)
 	for _, m := range matchesEl {
-		match := Match{}
-		table := cascadia.Query(m, tableSel)
+		match := Match{
+			EventID: event.ID,
+			Pod:     pod,
+			Round:   round,
+		}
 
+		table := cascadia.Query(m, tableSel)
 		match.Table = innerText(table)
 
 		players := cascadia.QueryAll(m, playersSel)

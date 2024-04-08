@@ -31,6 +31,14 @@ func (evt *Event) RosterURL() string {
 	return fmt.Sprintf("/roster/%s", evt.ID)
 }
 
+func (evt *Event) HasStarted() bool {
+	return evt.StartDate.Before(time.Now())
+}
+
+func (evt *Event) HasEnded() bool {
+	return evt.EndDate.Before(time.Now())
+}
+
 var EventsURL = "/events/pokemon"
 
 func GetEvents() ([]*Event, error) {
