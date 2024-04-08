@@ -91,7 +91,7 @@ func (c *ConnectionBuilder) ConnectionString() string {
 	return connURL.String()
 }
 
-func (c *ConnectionBuilder) Build() (*pgxpool.Pool, error) {
+func (c *ConnectionBuilder) GetConnection() (*pgxpool.Pool, error) {
 	connURL := c.ConnectionString()
 	pgConf, err := pgxpool.ParseConfig(connURL)
 	if err != nil {
@@ -109,7 +109,7 @@ func (c *ConnectionBuilder) Build() (*pgxpool.Pool, error) {
 	return pgxpool.NewWithConfig(context.Background(), pgConf)
 }
 
-//go:embed schema.sql
+//go:embed sql/schema.sql
 var schema string
 
 func ApplySchema(ctx context.Context, conn *pgxpool.Pool) error {

@@ -17,7 +17,7 @@ func main() {
 
 	if initDB {
 		builder := api.NewConnectionBuilder()
-		conn, err := builder.WithEnvVars().Build()
+		conn, err := builder.WithEnvVars().GetConnection()
 		if err != nil {
 			panic(err)
 		}
@@ -26,6 +26,10 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		return
+	}
+
+	if startServer {
 		return
 	}
 }
