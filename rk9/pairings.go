@@ -198,9 +198,13 @@ func parseRecord(record string) (int, int, int, int, error) {
 			return 0, 0, 0, 0, err
 		}
 
-		points, err := strconv.Atoi(string(matches[3]))
-		if err != nil {
-			return 0, 0, 0, 0, err
+		// when the Top 8 cut is reached points are not reported in the record
+		points := 0
+		if len(matches) > 4 {
+			points, err = strconv.Atoi(string(matches[3]))
+			if err != nil {
+				return 0, 0, 0, 0, err
+			}
 		}
 
 		return wins, losses, ties, points, nil

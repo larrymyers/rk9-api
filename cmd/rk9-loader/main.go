@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"larrymyers.com/rk9api/api"
 	"larrymyers.com/rk9api/rk9"
@@ -32,10 +33,14 @@ func main() {
 
 	for _, event := range events {
 		if event.HasStarted() {
+			fmt.Printf("Event: %s\n", event.Name)
+
 			rounds, err := rk9.GetRounds(event)
 			if err != nil {
 				panic(err)
 			}
+
+			fmt.Printf("Rounds: %d\n", rounds.Masters)
 
 			for round := range rounds.Masters {
 				matches, err := rk9.GetRound(event, rk9.Masters, round+1)
@@ -43,7 +48,7 @@ func main() {
 					panic(err)
 				}
 
-				println(matches)
+				fmt.Printf("Round %d: %d matches\n", round, len(matches))
 			}
 		}
 	}
