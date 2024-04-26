@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"time"
 
 	"larrymyers.com/rk9api/graph/generated"
 	"larrymyers.com/rk9api/graph/model"
@@ -25,8 +24,8 @@ func (r *queryResolver) Events(ctx context.Context) ([]*model.Event, error) {
 			ID:        event.ID,
 			Name:      event.Name,
 			Location:  event.Location,
-			StartDate: event.StartDate.Format(time.RFC3339),
-			EndDate:   event.EndDate.Format(time.RFC3339),
+			StartDate: event.StartDate.String(),
+			EndDate:   event.EndDate.String(),
 			URL:       event.URL,
 		})
 	}

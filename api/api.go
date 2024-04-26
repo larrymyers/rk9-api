@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"larrymyers.com/rk9api/rk9"
@@ -34,12 +36,18 @@ func (c *Client) GetEvents(ctx context.Context) ([]*rk9.Event, error) {
 		return nil, err
 	}
 
+	var startDate time.Time
+	var endDate time.Time
+
 	events, err := pgx.CollectRows[*rk9.Event](rows, func(row pgx.CollectableRow) (*rk9.Event, error) {
 		var event rk9.Event
-		err := row.Scan(&event.ID, &event.Name, &event.Location, &event.StartDate, &event.EndDate, &event.URL)
+		err := row.Scan(&event.ID, &event.Name, &event.Location, &startDate, &endDate, &event.URL)
 		if err != nil {
 			return nil, err
 		}
+
+		event.StartDate = civil.DateOf(startDate)
+		event.EndDate = civil.DateOf(endDate)
 
 		return &event, nil
 	})

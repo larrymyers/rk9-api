@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/andybalholm/cascadia"
 	"golang.org/x/net/html"
 )
@@ -14,8 +15,8 @@ type Event struct {
 	ID        string
 	Name      string
 	Location  string
-	StartDate time.Time
-	EndDate   time.Time
+	StartDate civil.Date
+	EndDate   civil.Date
 	URL       string
 }
 
@@ -32,11 +33,11 @@ func (evt *Event) RosterURL() string {
 }
 
 func (evt *Event) HasStarted() bool {
-	return evt.StartDate.Before(time.Now())
+	return evt.StartDate.Before(civil.DateOf(time.Now()))
 }
 
 func (evt *Event) HasEnded() bool {
-	return evt.EndDate.Before(time.Now())
+	return evt.EndDate.Before(civil.DateOf(time.Now()))
 }
 
 var EventsURL = "/events/pokemon"
@@ -126,9 +127,10 @@ func parseAnchor(node *html.Node) (string, string) {
 	return text, href
 }
 
-func parseDateRange(s string) (time.Time, time.Time, error) {
+func parseDateRange(s string) (civil.Date, civil.Date, error) {
 	s = strings.ReplaceAll(s, "–", "-")
 	parts := strings.Split(s, " ")
+	today := civil.DateOf(time.Now())
 
 	// same month: April 1-10, 2023
 	if len(parts) == 3 {
@@ -143,15 +145,15 @@ func parseDateRange(s string) (time.Time, time.Time, error) {
 
 		start, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s %s", month, startDay, year))
 		if err != nil {
-			return time.Now(), time.Now(), err
+			return today, today, err
 		}
 
 		end, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s %s", month, endDay, year))
 		if err != nil {
-			return time.Now(), time.Now(), err
+			return today, today, err
 		}
 
-		return start, end, nil
+		return civil.DateOf(start), civil.DateOf(end), nil
 	}
 
 	// multiple months: January 4-July 18, 2024
@@ -163,16 +165,16 @@ func parseDateRange(s string) (time.Time, time.Time, error) {
 
 		start, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s", parts[0], year))
 		if err != nil {
-			return time.Now(), time.Now(), err
+			return civil.DateOf(time.Now()), civil.DateOf(time.Now()), err
 		}
 
 		end, err := time.Parse("January 2 2006", fmt.Sprintf("%s %s", parts[1], year))
 		if err != nil {
-			return time.Now(), time.Now(), err
+			return today, today, err
 		}
 
-		return start, end, nil
+		return civil.DateOf(start), civil.DateOf(end), nil
 	}
 
-	return time.Now(), time.Now(), errors.New(fmt.Sprintf("unrecognized date range: %s", s))
+	return today, today, errors.New(fmt.Sprintf("unrecognized date range: %s", s))
 }
