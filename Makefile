@@ -29,6 +29,9 @@ install:
 run: install
 	set -o allexport; source development.env; set +o allexport && rk9 -server
 
+loader:
+	set -o allexport; source development.env; set +o allexport && go run cmd/rk9-loader/main.go
+
 dev_setup: install
 	set -o allexport; source development.env; set +o allexport \
 	&& rk9 -init-db

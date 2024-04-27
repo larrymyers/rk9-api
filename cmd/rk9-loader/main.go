@@ -49,7 +49,16 @@ func main() {
 				}
 
 				fmt.Printf("Round %d: %d matches\n", round, len(matches))
+
+				for _, match := range matches {
+					err := client.UpsertMatch(context.Background(), match)
+					if err != nil {
+						panic(err)
+					}
+				}
 			}
+
+			break
 		}
 	}
 }

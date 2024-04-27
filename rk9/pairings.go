@@ -1,6 +1,7 @@
 package rk9
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -29,12 +30,15 @@ type Match struct {
 	Player1 *EventPlayer
 	Player2 *EventPlayer
 	Winner  *EventPlayer
+	IsTie   bool
+}
+
+func (m *Match) ID() string {
+	return fmt.Sprintf("%d-%d-%s", m.Pod, m.Round, m.Table)
 }
 
 type EventPlayer struct {
-	FirstName   string
-	LastName    string
-	MatchName   string
+	Name        string
 	Country     string
 	Wins        int
 	Losses      int
@@ -42,6 +46,14 @@ type EventPlayer struct {
 	Points      int
 	DecklistURL string
 	Standing    int
+}
+
+func (p *EventPlayer) ID() string {
+	if p == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s-%s", p.Name, p.Country)
 }
 
 func GetRounds(event *Event) (EventRounds, error) {
@@ -153,12 +165,12 @@ func GetRound(event *Event, pod int, round int) ([]*Match, error) {
 			// TODO find a way to safely match name to FirstName + LastName and Country
 
 			player := EventPlayer{
-				MatchName: name,
-				Country:   country,
-				Wins:      wins,
-				Losses:    losses,
-				Ties:      ties,
-				Points:    points,
+				Name:    name,
+				Country: country,
+				Wins:    wins,
+				Losses:  losses,
+				Ties:    ties,
+				Points:  points,
 			}
 
 			if hasClass(p, "player1") {
@@ -169,6 +181,10 @@ func GetRound(event *Event, pod int, round int) ([]*Match, error) {
 
 			if hasClass(p, "winner") {
 				match.Winner = &player
+			}
+
+			if hasClass(p, "tie") {
+				match.IsTie = true
 			}
 		}
 
